@@ -6,19 +6,23 @@
     "scheme": "myquotidian",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "ios": {
       "bundleIdentifier": "com.myquotidian.app",
       "supportsTablet": true,
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
-        "UIBackgroundModes": ["remote-notification"]
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
       }
     },
     "android": {
       "package": "com.myquotidian.app",
       "googleServicesFile": "./google-services.json",
-      "permissions": ["POST_NOTIFICATIONS"]
+      "permissions": [
+        "POST_NOTIFICATIONS"
+      ]
     },
     "plugins": [
       "expo-router",
@@ -27,13 +31,20 @@
       [
         "expo-build-properties",
         {
-          "ios": { "useFrameworks": "static" }
+          "ios": {
+            "useFrameworks": "static"
+          }
         }
       ]
     ],
     "extra": {
-      "router": {},
-      "eas": {}
-    }
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "636d36f7-73b8-45bf-9b01-0e170e8c4152"
+      }
+    },
+    "owner": "benattali"
   }
 }
