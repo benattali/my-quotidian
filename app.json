@@ -29,12 +29,6 @@
         {
           "ios": { "useFrameworks": "static" }
         }
-      ],
-      [
-        "@react-native-google-signin/google-signin",
-        {
-          "iosUrlScheme": "REPLACE_WITH_REVERSED_IOS_CLIENT_ID"
-        }
       ]
     ],
     "extra": {
