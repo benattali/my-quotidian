@@ -98,19 +98,32 @@ Open `GoogleService-Info.plist`, copy `REVERSED_CLIENT_ID`, and paste it into `a
 6. Paste the Facebook **App ID + App Secret** into Firebase console → Authentication → Facebook, and copy the **OAuth redirect URI** Firebase shows into the Facebook app's Valid OAuth Redirect URIs.
 7. Re-run `npx expo prebuild` and rebuild.
 
-## 4. iOS push (APNs) — needed only for iOS notifications
+## 4. iOS setup — OPTIONAL, not configured yet (Android-only by default)
 
+The project currently targets **Android only**. Two things were deliberately left out
+so the Android build works cleanly, and must be added when you set up iOS:
+
+- The `@react-native-google-signin/google-signin` **config plugin** was removed from
+  `app.json` (its plugin rejects a placeholder `iosUrlScheme`). Re-add it with the real
+  reversed iOS client id from `GoogleService-Info.plist`:
+  ```json
+  ["@react-native-google-signin/google-signin", { "iosUrlScheme": "com.googleusercontent.apps.<...>" }]
+  ```
+- `GoogleService-Info.plist` must be downloaded (register an **iOS app** in Firebase) and
+  placed in the project root (already referenced by `ios.googleServicesFile` in `app.json`).
+
+**iOS push (APNs):**
 1. Enroll in the **Apple Developer Program** ($99/yr).
 2. Create an **APNs Auth Key** (.p8) in the Apple Developer portal (Keys → enable Apple Push Notifications service).
 3. Upload it in Firebase console → Project settings → **Cloud Messaging → Apple app configuration** (key, Key ID, Team ID).
 
 > Android/FCM needs nothing extra here — it works from `google-services.json`.
 
-## 5. Replace all placeholders
+## 5. Remaining placeholders
 
-Search the repo for `REPLACE_WITH` and fill each in:
-- `src/config.ts` → `GOOGLE_WEB_CLIENT_ID`
-- `app.json` → `iosUrlScheme`, Facebook `appID` / `clientToken` / `scheme`
+Most credentials are already filled in. What's left, only when you need it:
+- **iOS:** `app.json` `iosUrlScheme` (re-added plugin, see §4) — iOS only
+- **Facebook:** `app.json` FB plugin `appID` / `clientToken` / `scheme` + `FACEBOOK_ENABLED` (see §3) — only if enabling Facebook
 
 ## 6. Deploy the backend
 
