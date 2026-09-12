@@ -1,0 +1,23 @@
+# EAS uses this file (instead of .gitignore) to decide what to upload to the
+# cloud builder. It mirrors .gitignore BUT deliberately does NOT exclude
+# google-services.json / GoogleService-Info.plist, so the native Firebase config
+# reaches the builder while still staying out of git.
+
+node_modules/
+functions/
+
+# Expo / native — regenerated on the builder
+.expo/
+dist/
+web-build/
+/ios
+/android
+
+# Secrets that must NOT go to the builder
+functions/serviceAccountKey.json
+.env
+.env.local
+
+# macOS
+.DS_Store
+*.log

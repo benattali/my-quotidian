@@ -1,0 +1,32 @@
+# dependencies
+node_modules/
+functions/node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+/ios
+/android
+
+# Secrets — DO NOT COMMIT these credential files
+google-services.json
+GoogleService-Info.plist
+functions/serviceAccountKey.json
+.env
+.env.local
+
+# Firebase
+functions/lib/
+.firebase/
+
+# macOS
+.DS_Store
+
+# misc
+*.log
+npm-debug.*
+yarn-error.*
