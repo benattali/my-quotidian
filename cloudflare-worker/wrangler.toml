@@ -1,0 +1,16 @@
+name = "my-quotidian-backend"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+# Non-secret config. Secrets (FIREBASE_SERVICE_ACCOUNT, TRIGGER_KEY) are set with
+# `wrangler secret put` — never commit them.
+[vars]
+PROJECT_ID = "my-quotidian"
+DEDUPE_WINDOW_DAYS = "180"
+NOTIFY_WINDOW_MINUTES = "30"
+
+# Two schedules (UTC):
+#  - "5 0 * * *"   → roll the global quote-of-the-day once daily at 00:05 UTC
+#  - "*/5 * * * *" → every 5 min, push to users whose local notify time just arrived
+[triggers]
+crons = ["5 0 * * *", "*/5 * * * *"]

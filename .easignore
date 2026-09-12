@@ -4,7 +4,7 @@
 # reaches the builder while still staying out of git.
 
 node_modules/
-functions/
+cloudflare-worker/
 
 # Expo / native — regenerated on the builder
 .expo/

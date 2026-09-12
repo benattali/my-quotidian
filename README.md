@@ -4,7 +4,7 @@ A cross-platform (iOS + Android) app that delivers one **real, human-authored** 
 
 - **App:** Expo (React Native, TypeScript) + Expo Router
 - **Auth + data:** Firebase Auth (Google/Facebook) + Cloud Firestore
-- **Push:** Firebase Cloud Messaging (FCM), driven by scheduled Cloud Functions
+- **Push:** Firebase Cloud Messaging (FCM), driven by a scheduled Cloudflare Worker (`cloudflare-worker/`)
 - **Quotes:** [ZenQuotes](https://zenquotes.io) — a curated database of genuine quotations (no AI-generated text)
 
 ## How it works
@@ -20,7 +20,7 @@ Firestore  users/{uid}  ·  users/{uid}/favorites/*  ·  dailyQuote/current  · 
    └──────────────────────────────────────────────────────── local notify time just arrived ─▶ 📱
 ```
 
-- **No repeats:** `rollDailyQuote` rejects any quote used within `DEDUPE_WINDOW_DAYS` (default **180 days**) — see `functions/src/config.ts`. Never same-as-yesterday; recurrence only after ~6 months.
+- **No repeats:** `rollDailyQuote` rejects any quote used within `DEDUPE_WINDOW_DAYS` (default **180 days**) — see `cloudflare-worker/wrangler.toml`. Never same-as-yesterday; recurrence only after ~6 months.
 - **Timezones / time changes:** the chosen time lives in Firestore, not baked into notifications. Change it any time; the next 5-minute tick respects it. `lastNotifiedQuoteId` guarantees each user gets each daily quote exactly once.
 - **Works even if the app is never reopened** — delivery is fully server-side.
 
@@ -53,7 +53,7 @@ You also need **Xcode** (for iOS) and/or **Android Studio** (for Android) since 
 ## 1. ⛔ Create the Firebase project
 
 1. https://console.firebase.google.com → **Add project**.
-2. **Upgrade to the Blaze (pay-as-you-go) plan** — required for scheduled Cloud Functions. It has a large free monthly quota; this app should stay within it.
+2. The free **Spark plan is enough** — the backend runs on a Cloudflare Worker (see `cloudflare-worker/SETUP.md`), so no Blaze/billing is required.
 3. Add an **Android app** with package `com.myquotidian.app` → download **`google-services.json`** → place it in the project root.
 4. Add an **iOS app** with bundle id `com.myquotidian.app` → download **`GoogleService-Info.plist`** → place it in the project root.
    - (Change the package/bundle id in `app.json` if you use your own — keep all three in sync.)
@@ -127,19 +127,18 @@ Most credentials are already filled in. What's left, only when you need it:
 
 ## 6. Deploy the backend
 
+**Firestore security rules** (Firebase CLI):
 ```bash
-cd functions && npm install && cd ..
 firebase deploy --only firestore:rules
-firebase deploy --only functions
 ```
 
-Seed the first quote immediately (otherwise the app shows "no quote yet" until 00:05 UTC):
-
+**The quote/notification backend** runs on a free **Cloudflare Worker** — full
+steps in [`cloudflare-worker/SETUP.md`](cloudflare-worker/SETUP.md). In short:
+generate a Firebase service-account key, `wrangler login`, set the
+`FIREBASE_SERVICE_ACCOUNT` + `TRIGGER_KEY` secrets, `wrangler deploy`, then seed
+the first quote:
 ```bash
-# after deploy, trigger the scheduled job once from the console:
-# Firebase console → Functions → rollDailyQuote → (Cloud Scheduler) "Run now"
-# or via gcloud:
-gcloud scheduler jobs run firebase-schedule-rollDailyQuote-us-central1
+curl "https://my-quotidian-backend.<subdomain>.workers.dev/roll?key=<TRIGGER_KEY>"
 ```
 
 ## 7. Build & run the app (development build)
@@ -161,8 +160,8 @@ npm start
 
 ## Tuning
 
-- **No-repeat window:** `functions/src/config.ts` → `DEDUPE_WINDOW_DAYS`.
-- **Notification precision / catch-up window:** `NOTIFY_WINDOW_MINUTES` (default 30) + the `every 5 minutes` schedule in `functions/src/index.ts`.
+- **No-repeat window:** `cloudflare-worker/wrangler.toml` → `DEDUPE_WINDOW_DAYS`.
+- **Notification precision / catch-up window:** `NOTIFY_WINDOW_MINUTES` + the `*/5 * * * *` schedule in `cloudflare-worker/wrangler.toml`.
 - **Default time for new users:** `src/config.ts` → `DEFAULT_NOTIFY_TIME`.
 
 ## Notes & limits

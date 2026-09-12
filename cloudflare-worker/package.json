@@ -1,0 +1,15 @@
+{
+  "name": "my-quotidian-backend",
+  "private": true,
+  "description": "Cloudflare Worker: rolls the daily quote and sends FCM pushes (free replacement for Firebase Cloud Functions).",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250101.0",
+    "typescript": "^5.3.3",
+    "wrangler": "^3.99.0"
+  }
+}
