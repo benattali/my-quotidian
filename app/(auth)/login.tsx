@@ -9,32 +9,24 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import {
-  SignInCancelledError,
-  signInWithFacebook,
-  signInWithGoogle,
-} from '@/auth';
-import { FACEBOOK_ENABLED } from '@/config';
+import { SignInCancelledError, signInWithGoogle } from '@/auth';
 import { colors, spacing } from '@/theme';
 
 export default function Login() {
-  const [busy, setBusy] = useState<null | 'google' | 'facebook'>(null);
+  const [busy, setBusy] = useState(false);
 
-  async function run(
-    provider: 'google' | 'facebook',
-    fn: () => Promise<unknown>,
-  ) {
+  async function onGoogle() {
     if (busy) return;
-    setBusy(provider);
+    setBusy(true);
     try {
-      await fn();
+      await signInWithGoogle();
       // On success, the auth gate in _layout navigates to the tabs.
     } catch (err) {
       if (!(err instanceof SignInCancelledError)) {
         Alert.alert('Sign-in failed', (err as Error).message);
       }
     } finally {
-      setBusy(null);
+      setBusy(false);
     }
   }
 
@@ -51,10 +43,10 @@ export default function Login() {
       <View style={styles.actions}>
         <Pressable
           style={[styles.button, styles.google]}
-          disabled={!!busy}
-          onPress={() => run('google', signInWithGoogle)}
+          disabled={busy}
+          onPress={onGoogle}
         >
-          {busy === 'google' ? (
+          {busy ? (
             <ActivityIndicator color="#1f1f1f" />
           ) : (
             <Text style={[styles.buttonText, styles.googleText]}>
@@ -62,22 +54,6 @@ export default function Login() {
             </Text>
           )}
         </Pressable>
-
-        {FACEBOOK_ENABLED && (
-          <Pressable
-            style={[styles.button, styles.facebook]}
-            disabled={!!busy}
-            onPress={() => run('facebook', signInWithFacebook)}
-          >
-            {busy === 'facebook' ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={[styles.buttonText, styles.facebookText]}>
-                Continue with Facebook
-              </Text>
-            )}
-          </Pressable>
-        )}
       </View>
     </SafeAreaView>
   );
@@ -111,6 +87,4 @@ const styles = StyleSheet.create({
   buttonText: { fontSize: 16, fontWeight: '700' },
   google: { backgroundColor: '#ffffff' },
   googleText: { color: '#1f1f1f' },
-  facebook: { backgroundColor: '#1877f2' },
-  facebookText: { color: '#ffffff' },
 });

@@ -3,13 +3,8 @@ import {
   GoogleSignin,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
-import { Platform } from 'react-native';
 
-import { FACEBOOK_ENABLED, GOOGLE_WEB_CLIENT_ID } from './config';
-
-// NOTE: react-native-fbsdk-next is imported *dynamically* (only when Facebook is
-// enabled) so that a Google-only build doesn't touch the Facebook SDK at all.
-// See FACEBOOK_ENABLED in config.ts and the "Enabling Facebook" section in README.
+import { GOOGLE_WEB_CLIENT_ID } from './config';
 
 /**
  * Call once at app startup (before any sign-in attempt).
@@ -19,12 +14,6 @@ export function configureAuthProviders() {
     webClientId: GOOGLE_WEB_CLIENT_ID,
     // offlineAccess not required for Firebase credential sign-in.
   });
-
-  if (FACEBOOK_ENABLED) {
-    void import('react-native-fbsdk-next').then(({ Settings }) => {
-      Settings.initializeSDK();
-    });
-  }
 }
 
 export class SignInCancelledError extends Error {
@@ -58,47 +47,11 @@ export async function signInWithGoogle() {
   }
 }
 
-/**
- * Facebook sign-in → Firebase. Returns the Firebase user credential.
- * Only usable once FACEBOOK_ENABLED is true and the native SDK is configured.
- */
-export async function signInWithFacebook() {
-  if (!FACEBOOK_ENABLED) {
-    throw new Error('Facebook sign-in is not enabled in this build.');
-  }
-  const { AccessToken, LoginManager } = await import('react-native-fbsdk-next');
-  const loginResult = await LoginManager.logInWithPermissions([
-    'public_profile',
-    'email',
-  ]);
-  if (loginResult.isCancelled) {
-    throw new SignInCancelledError();
-  }
-
-  const tokenData = await AccessToken.getCurrentAccessToken();
-  if (!tokenData?.accessToken) {
-    throw new Error('Failed to obtain Facebook access token.');
-  }
-  const credential = auth.FacebookAuthProvider.credential(
-    tokenData.accessToken.toString(),
-  );
-  return await auth().signInWithCredential(credential);
-}
-
 export async function signOut() {
-  // Best-effort provider sign-out, then Firebase.
   try {
     await GoogleSignin.signOut();
   } catch {
     /* not signed in with Google — ignore */
-  }
-  if (FACEBOOK_ENABLED && Platform.OS !== 'web') {
-    try {
-      const { LoginManager } = await import('react-native-fbsdk-next');
-      LoginManager.logOut();
-    } catch {
-      /* ignore */
-    }
   }
   await auth().signOut();
 }

@@ -1,16 +1,16 @@
 # My Quotidian
 
-A cross-platform (iOS + Android) app that delivers one **real, human-authored** motivational quote per day as a push notification at a time the user chooses, shows the same quote in-app, and lets users heart quotes and browse their favorites. Sign-in is Google or Facebook.
+A cross-platform (iOS + Android) app that delivers one **real, human-authored** motivational quote per day as a push notification at a time the user chooses, shows the same quote in-app, and lets users heart quotes and browse their favorites. Sign-in is Google.
 
 - **App:** Expo (React Native, TypeScript) + Expo Router
-- **Auth + data:** Firebase Auth (Google/Facebook) + Cloud Firestore
+- **Auth + data:** Firebase Auth (Google) + Cloud Firestore
 - **Push:** Firebase Cloud Messaging (FCM), driven by a scheduled Cloudflare Worker (`cloudflare-worker/`)
 - **Quotes:** [ZenQuotes](https://zenquotes.io) — a curated database of genuine quotations (no AI-generated text)
 
 ## How it works
 
 ```
-Expo app ── Google/Facebook ─▶ Firebase Auth
+Expo app ──── Google ────▶ Firebase Auth
    │  saves notifyTime + FCM token
    ▼
 Firestore  users/{uid}  ·  users/{uid}/favorites/*  ·  dailyQuote/current  ·  quoteHistory/*
@@ -48,7 +48,7 @@ npm install -g firebase-tools eas-cli
 firebase login
 ```
 
-You also need **Xcode** (for iOS) and/or **Android Studio** (for Android) since this app uses native modules (FCM, Google/Facebook SDKs) and therefore a **development build** — it does **not** run in Expo Go.
+You also need **Xcode** (for iOS) and/or **Android Studio** (for Android) since this app uses native modules (FCM, Google Sign-In) and therefore a **development build** — it does **not** run in Expo Go.
 
 ## 1. ⛔ Create the Firebase project
 
@@ -65,7 +65,6 @@ You also need **Xcode** (for iOS) and/or **Android Studio** (for Android) since 
 Firebase console → **Authentication → Sign-in method**:
 
 - **Google:** enable it. Copy the **Web client ID** shown (ends in `.apps.googleusercontent.com`) into `src/config.ts` → `GOOGLE_WEB_CLIENT_ID`. This web client id is required for Google sign-in on *both* platforms.
-- **Facebook:** enable it; you'll paste the App ID + secret here after step 4.
 
 ### Android extra (Google sign-in): add your signing SHA-1
 
@@ -78,27 +77,7 @@ Google sign-in on Android needs your app's SHA-1 fingerprints registered in Fire
 
 Open `GoogleService-Info.plist`, copy `REVERSED_CLIENT_ID`, and paste it into `app.json` → `@react-native-google-signin/google-signin` plugin → `iosUrlScheme`.
 
-## 3. ⛔ Facebook app — OPTIONAL, dormant by default
-
-> **Facebook login ships turned OFF.** `FACEBOOK_ENABLED = false` in `src/config.ts`, the
-> `react-native-fbsdk-next` config plugin is removed from `app.json`, and the FB SDK is
-> excluded from native autolinking in `react-native.config.js`. The login screen shows
-> only "Continue with Google." You can build and ship Google-only and ignore this section.
-
-**To enable Facebook later:**
-
-1. https://developers.facebook.com → **Create App** → add **Facebook Login**.
-2. Re-add the config plugin to `app.json` `plugins` (appID, clientToken, `displayName`, `scheme` = `fb<APP_ID>`):
-   ```json
-   ["react-native-fbsdk-next", { "appID": "<APP_ID>", "clientToken": "<CLIENT_TOKEN>", "displayName": "My Quotidian", "scheme": "fb<APP_ID>" }]
-   ```
-3. In `react-native.config.js`, delete the two `null` platform overrides (or delete the file) so the SDK autolinks again.
-4. Set `FACEBOOK_ENABLED = true` in `src/config.ts`.
-5. In the Facebook app: add the **iOS** platform (your bundle id) and **Android** platform (package + key hashes).
-6. Paste the Facebook **App ID + App Secret** into Firebase console → Authentication → Facebook, and copy the **OAuth redirect URI** Firebase shows into the Facebook app's Valid OAuth Redirect URIs.
-7. Re-run `npx expo prebuild` and rebuild.
-
-## 4. iOS setup — OPTIONAL, not configured yet (Android-only by default)
+## 3. iOS setup — OPTIONAL, not configured yet (Android-only by default)
 
 The project currently targets **Android only**. Two things were deliberately left out
 so the Android build works cleanly, and must be added when you set up iOS:
@@ -119,13 +98,12 @@ so the Android build works cleanly, and must be added when you set up iOS:
 
 > Android/FCM needs nothing extra here — it works from `google-services.json`.
 
-## 5. Remaining placeholders
+## 4. Remaining placeholders
 
 Most credentials are already filled in. What's left, only when you need it:
-- **iOS:** `app.json` `iosUrlScheme` (re-added plugin, see §4) — iOS only
-- **Facebook:** `app.json` FB plugin `appID` / `clientToken` / `scheme` + `FACEBOOK_ENABLED` (see §3) — only if enabling Facebook
+- **iOS:** `app.json` `iosUrlScheme` (re-added plugin, see §3) — iOS only
 
-## 6. Deploy the backend
+## 5. Deploy the backend
 
 **Firestore security rules** (Firebase CLI):
 ```bash
@@ -141,7 +119,7 @@ the first quote:
 curl "https://my-quotidian-backend.<subdomain>.workers.dev/roll?key=<TRIGGER_KEY>"
 ```
 
-## 7. Build & run the app (development build)
+## 6. Build & run the app (development build)
 
 ```bash
 # Local native build (needs Xcode / Android Studio):
