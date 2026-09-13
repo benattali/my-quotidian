@@ -104,6 +104,7 @@ export default function Settings() {
         {user?.email ? (
           <Text style={styles.account}>Signed in as {user.email}</Text>
         ) : null}
+        <Text style={styles.attribution}>Quotes by ZenQuotes.io</Text>
       </View>
     </SafeAreaView>
   );
@@ -159,5 +160,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: 'center',
     marginTop: spacing.sm,
+  },
+  attribution: {
+    color: colors.muted,
+    fontSize: 11,
+    textAlign: 'center',
+    marginTop: spacing.md,
+    opacity: 0.6,
   },
 });

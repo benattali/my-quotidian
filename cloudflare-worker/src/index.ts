@@ -2,6 +2,7 @@ import { getAccessToken } from './google';
 import { decodeFields, fsGet, fsPatch, fsRunQuery } from './firestore';
 import { pickFreshQuote, recordQuoteUsed } from './quotes';
 import { sendPush } from './fcm';
+import { PRIVACY_HTML } from './privacy';
 
 interface Env {
   PROJECT_ID: string;
@@ -139,6 +140,11 @@ export default {
   //   curl "https://<worker>.workers.dev/notify?key=<TRIGGER_KEY>"
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+    if (url.pathname === '/privacy') {
+      return new Response(PRIVACY_HTML, {
+        headers: { 'content-type': 'text/html; charset=utf-8' },
+      });
+    }
     if (url.pathname === '/roll' || url.pathname === '/notify') {
       if (url.searchParams.get('key') !== env.TRIGGER_KEY) {
         return new Response('unauthorized', { status: 401 });
