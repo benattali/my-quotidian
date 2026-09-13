@@ -10,7 +10,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const HEART_OUTLINE = require('../../assets/icons/heart-outline.png');
-const HEART_FILLED = require('../../assets/icons/heart.png');
 
 import { useAuth } from '@/AuthContext';
 import { QuoteCard } from '@/components/QuoteCard';
@@ -74,11 +73,11 @@ export default function Today() {
               large
             />
             <View style={styles.banner}>
-              <Image source={HEART_OUTLINE} style={styles.bannerIcon} />
-              <Text style={styles.bannerText}>tap to save</Text>
-              <Text style={styles.bannerArrow}>→</Text>
-              <Image source={HEART_FILLED} style={styles.bannerIcon} />
-              <Text style={styles.bannerText}>saved to Favorites</Text>
+              <Text style={styles.bannerText}>
+                Tap the{' '}
+                <Image source={HEART_OUTLINE} style={styles.bannerHeart} />
+                {' '}to save this quote to your Favorites
+              </Text>
             </View>
           </>
         ) : (
@@ -103,11 +102,7 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   banner: {
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    flexWrap: 'wrap',
-    gap: spacing.xs,
     marginTop: spacing.md,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
@@ -116,8 +111,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.accent,
   },
-  bannerIcon: { width: 18, height: 18 },
-  bannerText: { color: colors.muted, fontSize: 13 },
-  bannerArrow: { color: colors.muted, fontSize: 13, marginHorizontal: spacing.xs },
+  bannerText: {
+    color: colors.muted,
+    fontSize: 13,
+    lineHeight: 20,
+    textAlign: 'center',
+  },
+  bannerHeart: { width: 15, height: 15 },
   empty: { color: colors.muted, fontSize: 16, textAlign: 'center' },
 });
