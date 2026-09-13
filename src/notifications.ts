@@ -7,6 +7,29 @@ import { Platform } from 'react-native';
 
 import { NOTIFICATION_CHANNEL_ID } from './config';
 
+export type NotifStatus = 'granted' | 'denied' | 'undetermined';
+
+function toStatus(s: FirebaseMessagingTypes.AuthorizationStatus): NotifStatus {
+  if (
+    s === messaging.AuthorizationStatus.AUTHORIZED ||
+    s === messaging.AuthorizationStatus.PROVISIONAL
+  ) {
+    return 'granted';
+  }
+  if (s === messaging.AuthorizationStatus.NOT_DETERMINED) return 'undetermined';
+  return 'denied';
+}
+
+/** Current notification permission status (no prompt shown). */
+export async function getNotificationStatus(): Promise<NotifStatus> {
+  return toStatus(await messaging().hasPermission());
+}
+
+/** Shows the OS permission prompt (only effective when status is undetermined). */
+export async function requestNotificationPermission(): Promise<NotifStatus> {
+  return toStatus(await messaging().requestPermission());
+}
+
 /** Create the Android channel the daily quote is delivered on (no-op on iOS). */
 export async function ensureNotificationChannel(): Promise<void> {
   if (Platform.OS === 'android') {

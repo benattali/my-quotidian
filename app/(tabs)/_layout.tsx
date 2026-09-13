@@ -1,8 +1,26 @@
-import { Tabs } from 'expo-router';
-import { BottomTabBar } from '@react-navigation/bottom-tabs';
-import { Image, ImageSourcePropType, View } from 'react-native';
+import { withLayoutContext } from 'expo-router';
+import {
+  createMaterialTopTabNavigator,
+  MaterialTopTabNavigationEventMap,
+  MaterialTopTabNavigationOptions,
+} from '@react-navigation/material-top-tabs';
+import type {
+  ParamListBase,
+  TabNavigationState,
+} from '@react-navigation/native';
+import { Image, ImageSourcePropType } from 'react-native';
 
 import { colors } from '@/theme';
+
+const { Navigator } = createMaterialTopTabNavigator();
+
+// Swipeable tab navigator wired into Expo Router.
+const MaterialTopTabs = withLayoutContext<
+  MaterialTopTabNavigationOptions,
+  typeof Navigator,
+  TabNavigationState<ParamListBase>,
+  MaterialTopTabNavigationEventMap
+>(Navigator);
 
 const icons = {
   today: require('../../assets/icons/sun.png') as ImageSourcePropType,
@@ -17,41 +35,43 @@ function TabIcon({
   source: ImageSourcePropType;
   focused: boolean;
 }) {
-  // Full-colour icons — dim the inactive ones instead of tinting.
   return (
     <Image
       source={source}
       resizeMode="contain"
-      style={{ width: 26, height: 26, opacity: focused ? 1 : 0.5 }}
+      style={{ width: 24, height: 24, opacity: focused ? 1 : 0.5 }}
     />
   );
 }
 
 export default function TabsLayout() {
   return (
-    <Tabs
-      // Draw the divider ourselves — a purple 1px top border on a wrapper —
-      // because the tab bar's own borderTopColor renders white regardless.
-      tabBar={(props) => (
-        <View style={{ borderTopWidth: 1, borderTopColor: colors.accent }}>
-          <BottomTabBar {...props} />
-        </View>
-      )}
+    <MaterialTopTabs
+      // Bottom tab bar, swipe left/right between screens.
+      tabBarPosition="bottom"
       screenOptions={{
-        headerStyle: { backgroundColor: colors.bg },
-        headerTitleStyle: { color: colors.accent, fontWeight: '800' },
-        headerShadowVisible: false,
-        tabBarStyle: {
-          backgroundColor: colors.card,
-          borderTopWidth: 0,
-          elevation: 0,
-          shadowOpacity: 0,
-        } as any,
+        swipeEnabled: true,
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.muted,
+        tabBarShowIcon: true,
+        tabBarPressColor: 'transparent',
+        tabBarIndicatorStyle: { height: 0 },
+        tabBarLabelStyle: {
+          textTransform: 'none',
+          fontSize: 11,
+          fontWeight: '600',
+          margin: 0,
+        },
+        tabBarStyle: {
+          backgroundColor: colors.card,
+          borderTopColor: colors.accent,
+          borderTopWidth: 1,
+          elevation: 0,
+          shadowOpacity: 0,
+        },
       }}
     >
-      <Tabs.Screen
+      <MaterialTopTabs.Screen
         name="index"
         options={{
           title: 'Today',
@@ -60,7 +80,7 @@ export default function TabsLayout() {
           ),
         }}
       />
-      <Tabs.Screen
+      <MaterialTopTabs.Screen
         name="favorites"
         options={{
           title: 'Favorites',
@@ -69,7 +89,7 @@ export default function TabsLayout() {
           ),
         }}
       />
-      <Tabs.Screen
+      <MaterialTopTabs.Screen
         name="settings"
         options={{
           title: 'Settings',
@@ -78,6 +98,6 @@ export default function TabsLayout() {
           ),
         }}
       />
-    </Tabs>
+    </MaterialTopTabs>
   );
 }

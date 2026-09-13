@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/AuthContext';
 import { QuoteCard } from '@/components/QuoteCard';
+import { ScreenHeader } from '@/components/ScreenHeader';
 import { subscribeFavorites, toggleFavorite } from '@/quotes';
 import { Favorite } from '@/types';
 import { colors, spacing } from '@/theme';
@@ -24,6 +25,7 @@ export default function Favorites() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
+      <ScreenHeader title="Favorites" />
       {!loading && favorites.length === 0 ? (
         <View style={styles.emptyWrap}>
           <Text style={styles.emptyEmoji}>🤍</Text>
@@ -33,6 +35,7 @@ export default function Favorites() {
         </View>
       ) : (
         <FlatList
+          style={styles.flatList}
           data={favorites}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
@@ -53,6 +56,7 @@ export default function Favorites() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
+  flatList: { flex: 1 },
   // Extra horizontal room (so corner marks clear the screen edge) and vertical
   // gap (so they don't overlap neighbours).
   list: { paddingHorizontal: 56, paddingVertical: spacing.lg, gap: 48 },

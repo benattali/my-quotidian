@@ -36,3 +36,6 @@ functions/lib/
 *.log
 npm-debug.*
 yarn-error.*
+
+# Build artifacts
+builds/

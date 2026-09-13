@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import {
   Alert,
+  AppState,
+  Linking,
   Platform,
   Pressable,
   StyleSheet,
@@ -13,7 +15,14 @@ import DateTimePicker, {
 } from '@react-native-community/datetimepicker';
 
 import { useAuth } from '@/AuthContext';
+import { ScreenHeader } from '@/components/ScreenHeader';
 import { signOut } from '@/auth';
+import {
+  getNotificationStatus,
+  NotifStatus,
+  registerForPushNotifications,
+  requestNotificationPermission,
+} from '@/notifications';
 import { subscribeUserPrefs, updateNotifyTime } from '@/quotes';
 import { UserPrefs } from '@/types';
 import { colors, spacing } from '@/theme';
@@ -50,6 +59,42 @@ export default function Settings() {
 
   const notifyTime = prefs?.notifyTime ?? DEFAULT_NOTIFY_TIME;
 
+  // Notification permission status (null until first check).
+  const [notifStatus, setNotifStatus] = useState<NotifStatus | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    async function check() {
+      const s = await getNotificationStatus();
+      if (!mounted) return;
+      setNotifStatus(s);
+      // If it's on (e.g. the user just enabled it in system settings), make sure
+      // this device's push token is registered so notifications actually arrive.
+      if (s === 'granted' && user) void registerForPushNotifications(user.uid);
+    }
+    void check();
+    // Re-check when returning to the app (e.g. from the system settings screen).
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') void check();
+    });
+    return () => {
+      mounted = false;
+      sub.remove();
+    };
+  }, [user]);
+
+  async function onEnableNotifications() {
+    const current = await getNotificationStatus();
+    if (current === 'undetermined') {
+      const res = await requestNotificationPermission();
+      setNotifStatus(res);
+      if (res === 'granted' && user) void registerForPushNotifications(user.uid);
+    } else if (current === 'denied') {
+      // Android won't show the prompt again once denied — send them to settings.
+      Linking.openSettings();
+    }
+  }
+
   async function onChangeTime(event: DateTimePickerEvent, date?: Date) {
     // On Android the picker is a one-shot dialog; dismiss it after any result.
     if (Platform.OS === 'android') setShowPicker(false);
@@ -63,10 +108,29 @@ export default function Settings() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
+      <ScreenHeader title="Settings" />
       <View style={styles.content}>
         <Text style={styles.sectionLabel}>NOTIFICATIONS</Text>
 
-        <Pressable style={styles.row} onPress={() => setShowPicker(true)}>
+        {notifStatus && notifStatus !== 'granted' && (
+          <Pressable
+            style={[styles.row, styles.accentCard]}
+            onPress={onEnableNotifications}
+          >
+            <View style={styles.rowText}>
+              <Text style={styles.rowTitle}>Turn on notifications</Text>
+              <Text style={styles.rowSubtitle}>
+                Enable notifications to start receiving quotes
+              </Text>
+            </View>
+            <Text style={styles.enableBtn}>Enable</Text>
+          </Pressable>
+        )}
+
+        <Pressable
+          style={[styles.row, styles.accentCard]}
+          onPress={() => setShowPicker(true)}
+        >
           <View style={styles.rowText}>
             <Text style={styles.rowTitle}>Delivery time</Text>
             <Text style={styles.rowSubtitle}>
@@ -136,11 +200,22 @@ const styles = StyleSheet.create({
   rowTitle: { color: colors.text, fontSize: 16, fontWeight: '600' },
   rowSubtitle: { color: colors.muted, fontSize: 13, marginTop: 2 },
   time: { color: colors.accent, fontSize: 17, fontWeight: '700' },
+  accentCard: { borderColor: colors.accent },
+  enableBtn: {
+    color: '#fff',
+    backgroundColor: colors.accent,
+    fontSize: 14,
+    fontWeight: '700',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
   pickerWrap: {
     backgroundColor: colors.card,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.accent,
     padding: spacing.sm,
   },
   doneBtn: { alignSelf: 'flex-end', padding: spacing.sm },
@@ -150,7 +225,8 @@ const styles = StyleSheet.create({
     height: 52,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.accent,
+    backgroundColor: colors.card,
     alignItems: 'center',
     justifyContent: 'center',
   },

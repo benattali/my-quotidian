@@ -14,6 +14,7 @@ const HEART_FILLED = require('../../assets/icons/heart.png');
 
 import { useAuth } from '@/AuthContext';
 import { QuoteCard } from '@/components/QuoteCard';
+import { ScreenHeader } from '@/components/ScreenHeader';
 import {
   subscribeFavorites,
   subscribeTodaysQuote,
@@ -60,6 +61,7 @@ export default function Today() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
+      <ScreenHeader title="Today" />
       <View style={styles.content}>
         {loading ? (
           <ActivityIndicator color={colors.accent} size="large" />
@@ -112,7 +114,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.accent,
   },
   bannerIcon: { width: 18, height: 18 },
   bannerText: { color: colors.muted, fontSize: 13 },
