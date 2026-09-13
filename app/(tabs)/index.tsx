@@ -2,11 +2,15 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Image,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+const HEART_OUTLINE = require('../../assets/icons/heart-outline.png');
+const HEART_FILLED = require('../../assets/icons/heart.png');
 
 import { useAuth } from '@/AuthContext';
 import { QuoteCard } from '@/components/QuoteCard';
@@ -61,13 +65,19 @@ export default function Today() {
           <ActivityIndicator color={colors.accent} size="large" />
         ) : quote ? (
           <>
-            <Text style={styles.kicker}>QUOTE OF THE DAY</Text>
             <QuoteCard
               quote={quote}
               favorited={favorited}
               onToggleFavorite={onToggle}
               large
             />
+            <View style={styles.banner}>
+              <Image source={HEART_OUTLINE} style={styles.bannerIcon} />
+              <Text style={styles.bannerText}>tap to save</Text>
+              <Text style={styles.bannerArrow}>→</Text>
+              <Image source={HEART_FILLED} style={styles.bannerIcon} />
+              <Text style={styles.bannerText}>saved to Favorites</Text>
+            </View>
           </>
         ) : (
           <Text style={styles.empty}>
@@ -84,14 +94,28 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     justifyContent: 'center',
-    padding: spacing.lg,
+    // Extra horizontal room so the corner quote marks poke into the margin
+    // rather than off the screen edge.
+    paddingHorizontal: 56,
+    paddingVertical: spacing.lg,
     gap: spacing.md,
   },
-  kicker: {
-    color: colors.accent,
-    fontSize: 13,
-    fontWeight: '800',
-    letterSpacing: 1.5,
+  banner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+    marginTop: spacing.md,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
+  bannerIcon: { width: 18, height: 18 },
+  bannerText: { color: colors.muted, fontSize: 13 },
+  bannerArrow: { color: colors.muted, fontSize: 13, marginHorizontal: spacing.xs },
   empty: { color: colors.muted, fontSize: 16, textAlign: 'center' },
 });

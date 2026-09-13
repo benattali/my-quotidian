@@ -53,7 +53,9 @@ export default function Favorites() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
-  list: { padding: spacing.md, gap: spacing.md },
+  // Extra horizontal room (so corner marks clear the screen edge) and vertical
+  // gap (so they don't overlap neighbours).
+  list: { paddingHorizontal: 56, paddingVertical: spacing.lg, gap: 48 },
   emptyWrap: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   emptyEmoji: { fontSize: 48, marginBottom: spacing.md },
   empty: {

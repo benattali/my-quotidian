@@ -3,7 +3,7 @@ export const colors = {
   card: '#1a1d24',
   text: '#f5f6f8',
   muted: '#9aa0ab',
-  accent: '#7c5cff',
+  accent: '#6C27B3',
   heart: '#ff4d6d',
   border: '#2a2e38',
 };

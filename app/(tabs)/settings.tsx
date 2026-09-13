@@ -4,7 +4,6 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Switch,
   Text,
   View,
 } from 'react-native';
@@ -15,11 +14,7 @@ import DateTimePicker, {
 
 import { useAuth } from '@/AuthContext';
 import { signOut } from '@/auth';
-import {
-  setNotificationsEnabled,
-  subscribeUserPrefs,
-  updateNotifyTime,
-} from '@/quotes';
+import { subscribeUserPrefs, updateNotifyTime } from '@/quotes';
 import { UserPrefs } from '@/types';
 import { colors, spacing } from '@/theme';
 import { DEFAULT_NOTIFY_TIME } from '@/config';
@@ -54,7 +49,6 @@ export default function Settings() {
   }, [user]);
 
   const notifyTime = prefs?.notifyTime ?? DEFAULT_NOTIFY_TIME;
-  const enabled = prefs?.notificationsEnabled ?? true;
 
   async function onChangeTime(event: DateTimePickerEvent, date?: Date) {
     // On Android the picker is a one-shot dialog; dismiss it after any result.
@@ -67,43 +61,16 @@ export default function Settings() {
     }
   }
 
-  async function onToggleEnabled(value: boolean) {
-    if (!user) return;
-    try {
-      await setNotificationsEnabled(user.uid, value);
-    } catch (e) {
-      Alert.alert('Could not update setting', (e as Error).message);
-    }
-  }
-
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <View style={styles.content}>
         <Text style={styles.sectionLabel}>NOTIFICATIONS</Text>
 
-        <View style={styles.row}>
-          <View style={styles.rowText}>
-            <Text style={styles.rowTitle}>Daily quote</Text>
-            <Text style={styles.rowSubtitle}>
-              Receive one uplifting quote every day
-            </Text>
-          </View>
-          <Switch
-            value={enabled}
-            onValueChange={onToggleEnabled}
-            trackColor={{ true: colors.accent, false: colors.border }}
-          />
-        </View>
-
-        <Pressable
-          style={[styles.row, !enabled && styles.disabled]}
-          disabled={!enabled}
-          onPress={() => setShowPicker(true)}
-        >
+        <Pressable style={styles.row} onPress={() => setShowPicker(true)}>
           <View style={styles.rowText}>
             <Text style={styles.rowTitle}>Delivery time</Text>
             <Text style={styles.rowSubtitle}>
-              When you’d like to receive it each day
+              When would you like to receive your inspiration?
             </Text>
           </View>
           <Text style={styles.time}>{formatDisplay(notifyTime)}</Text>
@@ -186,7 +153,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  signOutText: { color: colors.heart, fontSize: 16, fontWeight: '700' },
+  signOutText: { color: colors.accent, fontSize: 16, fontWeight: '700' },
   account: {
     color: colors.muted,
     fontSize: 13,
