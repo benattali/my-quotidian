@@ -3,6 +3,7 @@ import { decodeFields, fsGet, fsPatch, fsRunQuery } from './firestore';
 import { pickFreshQuote, recordQuoteUsed } from './quotes';
 import { sendPush } from './fcm';
 import { PRIVACY_HTML } from './privacy';
+import { DELETION_HTML } from './deletion';
 
 interface Env {
   PROJECT_ID: string;
@@ -142,6 +143,11 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === '/privacy') {
       return new Response(PRIVACY_HTML, {
+        headers: { 'content-type': 'text/html; charset=utf-8' },
+      });
+    }
+    if (url.pathname === '/data-deletion') {
+      return new Response(DELETION_HTML, {
         headers: { 'content-type': 'text/html; charset=utf-8' },
       });
     }
